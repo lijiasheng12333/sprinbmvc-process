@@ -42,12 +42,12 @@ spring:
 
 注意配置文件除了在properties下，也可以在yaml下，最好在yaml文件下
 
-###欢迎页支持
+### 欢迎页支持
   欢迎页默认情况是index.html
   
   * 注意，需要设置欢迎页的情况下，如果需要直接访问静态资源中的欢迎页。静态资源路径可以进行配置修改，但是访问前缀不能修改，否则的话则需要通过处理器handler进行跳转访问，至于为什么同样后面会提到。
 
-###静态资源配置原理
+### 静态资源配置原理
   * SpringBoot在启动时会默认加载一系列的AutoConfiguration类，也就是自动配置类。
   * 而对于MVC功能的配置类是WebMvcAutoConfiguration。
 
@@ -76,7 +76,7 @@ public class ResourceProperties {)
 
 &emsp;&emsp;可以看到这两个类分别与配置文件绑定且前缀为spring.mvc和spring.resources。这里暂且不做过多解释，不过前面对于静态资源访问在配置文件中的配置联系起来了，可以看到为什么前面是mvc以及resources了。
 
-####1.配置类只有一个有参构造器
+#### 1.配置类只有一个有参构造器
 
 而这个WebMvcAutoConfigurationAdapter这个静态内部类里面只有一个有参构造。
 
@@ -99,7 +99,7 @@ public WebMvcAutoConfigurationAdapter(ResourceProperties resourceProperties, Web
 
 在这个构造器中，所有的参数都是直接从容器中获取的,因为这个Mvc自动配置类是采用了轻量级的配置，也就是前面configuration注解里的proxyBeanMethods为false
 
-####2.资源处理默认规则
+#### 2.资源处理默认规则
 &emsp;&emsp;接下来看看资源处理的默认规则，同样在MVC这个自动配置类里面，往下找到addREsourceHandlers这个方法。
 
 ```java
@@ -223,7 +223,7 @@ private static final String[] CLASSPATH_RESOURCE_LOCATIONS = { "classpath:/META-
 
 总结起来就是，在默认情况下，在访问/**时，会去上述的默认文件夹去寻找静态资源。
 
-####3.欢迎页处理规则
+#### 3.欢迎页处理规则
 
 &emsp;前面我们提到过，需要直接访问静态资源欢迎页时，不能设置访问前缀，在这里我们一起来探寻这个原因吧。
 
