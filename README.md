@@ -97,7 +97,7 @@ public WebMvcAutoConfigurationAdapter(ResourceProperties resourceProperties, Web
 		}
 ````
 
-在这个构造器中，所有的参数都是直接从容器中获取的,因为这个Mvc自动配置类是采用了轻量级的配置，也就是前面configuration注解里的proxyBeanMethods为false
+一个自动配置类若只有一个有参构造器,则有参构造器中所有参数的值都会从容器中确定
 
 #### 2.资源处理默认规则
 &emsp;&emsp;接下来看看资源处理的默认规则，同样在MVC这个自动配置类里面，往下找到addREsourceHandlers这个方法。
