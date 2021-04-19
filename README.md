@@ -186,7 +186,7 @@ String staticPathPattern = this.mvcProperties.getStaticPathPattern();
 
 ![staticPathPattern1](https://github.com/lijiasheng12333/image/blob/main/picture/springboot/MVC/staticPathPattern1.png)
 
-这里就解释了前面为什么修改静态资源访问前缀是static-path-pattern了
+这里就解释了前面为什么修改静态资源访问前缀是static-path-pattern了,且默认情况下访问前缀/**
 
 &emsp;&emsp;接下来的条件判断
 
@@ -222,3 +222,44 @@ private static final String[] CLASSPATH_RESOURCE_LOCATIONS = { "classpath:/META-
 从这里也就解释了为什么默认静态资源访问地址是在META-INF/resources/",resources/,static/,public/这些文件夹下了。同样也解释了在配置文件中修改为什么是修改名字为static-locations这个属性了。
 
 总结起来就是，在默认情况下，在访问/**时，会去上述的默认文件夹去寻找静态资源。
+
+####3.欢迎页处理规则
+
+&emsp;前面我们提到过，需要直接访问静态资源欢迎页时，不能设置访问前缀，在这里我们一起来探寻这个原因吧。
+
+同样，在WebMvcAutoConfiguration这个自动配置类中找到WelcomePageHandlerMapping方法
+
+```java
+
+		@Bean
+		public WelcomePageHandlerMapping welcomePageHandlerMapping(ApplicationContext applicationContext,
+				FormattingConversionService mvcConversionService, ResourceUrlProvider mvcResourceUrlProvider) {
+			WelcomePageHandlerMapping welcomePageHandlerMapping = new WelcomePageHandlerMapping(
+					new TemplateAvailabilityProviders(applicationContext), applicationContext, getWelcomePage(),
+					this.mvcProperties.getStaticPathPattern());
+			welcomePageHandlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
+			welcomePageHandlerMapping.setCorsConfigurations(getCorsConfigurations());
+			return welcomePageHandlerMapping;
+		}
+```
+
+进入这个欢迎页处理映射器类的构造器中
+
+```java
+
+WelcomePageHandlerMapping(TemplateAvailabilityProviders templateAvailabilityProviders,
+			ApplicationContext applicationContext, Optional<Resource> welcomePage, String staticPathPattern) {
+		if (welcomePage.isPresent() && "/**".equals(staticPathPattern)) {
+			logger.info("Adding welcome page: " + welcomePage.get());
+			setRootViewName("forward:index.html");
+		}
+		else if (welcomeTemplateExists(templateAvailabilityProviders, applicationContext)) {
+			logger.info("Adding welcome page template: index");
+			setRootViewName("index");
+		}
+	}
+```
+
+我们可以看到在这个构造器中，它需要一个staticPathPattern的字符串，而这个字符串来源于MvcProperties中的staticPathPattern属性，因此，在默认情况下，获取到的这个字符串就是"/**"，因此在默认情况下，第一个条件判断就为true，因此在访问"/"时就会自动请求转发到index.html这个欢迎页中。
+而在设置了访问前缀后,这里就会进入第二个条件判断，然后转到index的处理器去帮助你访问到欢迎页。这也就解释了前面在配置了访问前缀后不能直接访问到欢迎页。
+
